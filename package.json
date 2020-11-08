@@ -1,0 +1,12 @@
+{
+  "name": "automemer",
+  "version": "0.0.1",
+  "description": "Sends memes from r/dankmemes to discord",
+  "main": "bot.js",
+  "dependencies": {
+    "axios": "^0.21.0",
+    "discord.js": "^12.4.1"
+  },
+  "author": "sebastianaldi17",
+  "license": "ISC"
+}
