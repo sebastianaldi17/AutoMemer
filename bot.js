@@ -16,7 +16,7 @@ function refreshMemes() {
         let results = response.data.data
         let children = results.children
         children.forEach(element => {
-            memes.push(element.data.url)
+            memes.push([element.data.url, 'Link: https://www.reddit.com' + element.data.permalink])
         });
         sendMeme()
     })
@@ -26,7 +26,9 @@ function refreshMemes() {
 }
 
 function sendMeme() {
-    memeChannel.send(memes[memeIndex])
+    memeChannel.send('Link: ' + memes[memeIndex][1], {
+        files: [memes[memeIndex][0]]
+    }).catch(console.error)
     memeIndex += 1
     if(memeIndex >= memes.length) {
         refreshMemes()
