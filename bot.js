@@ -26,7 +26,7 @@ function refreshMemes() {
 }
 
 function sendMeme() {
-    memeChannel.send('Link: ' + memes[memeIndex][1], {
+    memeChannel.send(memes[memeIndex][1], {
         files: [memes[memeIndex][0]]
     }).catch(console.error)
     memeIndex += 1
