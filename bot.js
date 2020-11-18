@@ -6,6 +6,7 @@ const client = new Discord.Client();
 
 let memes = []
 let memeIndex = 0
+let memeInterval = 1000 * parseInt(process.env.SECONDS)
 let memeChannel = ""
 
 function refreshMemes() {
@@ -28,7 +29,14 @@ function refreshMemes() {
 function sendMeme() {
     memeChannel.send(memes[memeIndex][1], {
         files: [memes[memeIndex][0]]
-    }).catch(console.error)
+    }).catch((err) => {
+        console.log(err)
+        memeChannel.send(memes[memeIndex][1])
+        .catch((err2) => {
+            console.log("Second degree error")
+            console.log(err2)
+        })
+    })
     memeIndex += 1
     if(memeIndex >= memes.length) {
         refreshMemes()
@@ -39,7 +47,7 @@ client.on('ready', () => {
     console.log('AutoMemer online.');
     memeChannel = client.channels.cache.get(process.env.CHANNEL_ID)
     refreshMemes()
-    setInterval(sendMeme, 7200000)
+    setInterval(sendMeme, memeInterval)
 });
 
 client.on('message', message => {
