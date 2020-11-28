@@ -13,32 +13,38 @@ function refreshMemes() {
     memes = []
     memeIndex = 0
     Axios.get('https://www.reddit.com/r/dankmemes/top/.json?t=day?limit=25')
-    .then((response) => {
-        let results = response.data.data
-        let children = results.children
-        children.forEach(element => {
-            memes.push([element.data.url, 'Link: https://www.reddit.com' + element.data.permalink])
-        });
-        sendMeme()
-    })
-    .catch((err) => {
-        console.log(err)
-    })
+        .then((response) => {
+            let results = response.data.data
+            let children = results.children
+            children.forEach(element => {
+                memes.push([element.data.url, 'Link: https://www.reddit.com' + element.data.permalink])
+            });
+            sendMeme()
+        })
+        .catch((err) => {
+            console.log(err)
+        })
 }
 
 function sendMeme() {
     memeChannel.send(memes[memeIndex][1], {
         files: [memes[memeIndex][0]]
     }).catch((err) => {
+        console.log("First level error")
         console.log(err)
         memeChannel.send(memes[memeIndex][1])
-        .catch((err2) => {
-            console.log("Second degree error")
-            console.log(err2)
-        })
+            .catch((err2) => {
+                console.log("Second level error")
+                console.log(err2)
+            })
+            .then(() => {
+                memeIndex += 1
+            })
     })
-    memeIndex += 1
-    if(memeIndex >= memes.length) {
+        .then(() => {
+            memeIndex += 1
+        })
+    if (memeIndex >= memes.length) {
         refreshMemes()
     }
 }
