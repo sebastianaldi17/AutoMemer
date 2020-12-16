@@ -12,10 +12,12 @@ let memeChannel = ""
 
 function tokopediaSearch(keywords, channel) {
     // Last working: 16 December 2020
+    console.log(keywords)
     let combined = keywords.concat('+')
     let url = `https://www.tokopedia.com/search?st=product&q=${combined}`
     Axios.get(url)
     .then(response => {
+        console.log(response.statusText)
         channel.send("Scrapping web...")
         .then(message => {
             const html = response.data
@@ -99,7 +101,7 @@ client.on('message', message => {
         } else {
             message.channel.send('Please insert additional keywords.')
         }
-    } else if(contents[1] === '!help') {
+    } else if(contents[0] === '!help') {
         message.channel.send('!tokped <keywords> - Searches product at Tokopedia')
     }
 });
