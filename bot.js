@@ -16,18 +16,25 @@ function tokopediaSearch(keywords, channel) {
     let url = `https://www.tokopedia.com/search?st=product&q=${combined}`
     Axios.get(url)
     .then(response => {
-        const html = response.data
-        const $ = cheerio.load(html)
-        const products = $('.css-18c4yhp')
-        const prices = $('.css-rhd610')
-        let string = ''
-        for(let i = 0; i < Math.min(products.length, 5); i++) {
-            console.log(products[i].children[0].data)
-            console.log(prices[i].children[0].data)
-            string += `${products[i].children[0].data} - ${prices[i].children[0].data} \n`
-        }
-        if(string.length > 0) channel.send(string)
-        else channel.send('No match found.')
+        channel.send("Scrapping web...")
+        .then(message => {
+            const html = response.data
+            const $ = cheerio.load(html)
+            const products = $('.css-18c4yhp')
+            const prices = $('.css-rhd610')
+            let string = ''
+            for(let i = 0; i < Math.min(products.length, 5); i++) {
+                console.log(products[i].children[0].data)
+                console.log(prices[i].children[0].data)
+                string += `${products[i].children[0].data} - ${prices[i].children[0].data} \n`
+            }
+            if(string.length > 0) message.edit(string)
+            else message.edit('No match found.')
+        })
+        .catch(error => {
+            console.log(error)
+            channel.send("An error has occured while trying to send the results.")
+        })
     })
     .catch(error => {
         channel.send('An error has occured while scrapping the data from Tokopedia.')
@@ -84,6 +91,7 @@ client.on('ready', () => {
 });
 
 client.on('message', message => {
+    if(message.author.bot) return
     let contents = message.content.split(' ')
     if(contents[0] === '!tokped') {
         if(contents.length > 1) {
@@ -91,6 +99,8 @@ client.on('message', message => {
         } else {
             message.channel.send('Please insert additional keywords.')
         }
+    } else if(contents[1] === '!help') {
+        message.channel.send('!tokped <keywords> - Searches product at Tokopedia')
     }
 });
 
