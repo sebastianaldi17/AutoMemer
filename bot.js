@@ -49,6 +49,7 @@ let searching = false
 // }
 
 // For Shopee, the initial request only returns the html. The JS must be run to fetch the data (which is why we need to use puppeteer)
+// https://github.com/puppeteer/puppeteer/blob/main/docs/troubleshooting.md#running-puppeteer-on-heroku
 async function shopeeSearch(keywords, channel) {
     let messageID = ''
     channel.send("Pleaase wait while we fetch results...")
@@ -57,7 +58,7 @@ async function shopeeSearch(keywords, channel) {
     })
     let combined = keywords.join('%20')
     let url = `https://shopee.co.id/search?keyword=${combined}`
-    const browser = await puppeteer.launch()
+    const browser = await puppeteer.launch({ args: ['--no-sandbox'] })
     const page = await browser.newPage()
     await page.goto(url)
     await page.waitForTimeout(4000)
