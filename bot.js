@@ -61,7 +61,7 @@ async function shopeeSearch(keywords, channel) {
     const browser = await puppeteer.launch({ args: ['--no-sandbox'] })
     const page = await browser.newPage()
     await page.goto(url)
-    await page.waitForTimeout(4000)
+    await page.waitForSelector('._1NoI8_')
     const html = await page.content()
 
     const $ = cheerio.load(html)
@@ -72,6 +72,9 @@ async function shopeeSearch(keywords, channel) {
 
     for(let i = 0; i < Math.min(products.length, 5); i++) {
         results += `${products[i].children[0].data} - Rp.${prices[i].children[0].data} \n`
+    }
+    if(results === '') {
+        results = 'Either no results found or an error has occured.'
     }
     browser.close()
     if(messageID !== '') {
