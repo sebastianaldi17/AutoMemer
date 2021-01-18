@@ -54,6 +54,7 @@ async function shopeeSearch(keywords, channel) {
     let messageID = await channel.send("Pleaase wait while we fetch results...")
     let combined = keywords.join('%20')
     let url = `https://shopee.co.id/search?keyword=${combined}`
+    let results = ''
     console.log(`Searching for ${keywords.join(' ')}`)
 
     const browser = await puppeteer.launch({ args: ['--no-sandbox'] })
