@@ -51,37 +51,36 @@ let searching = false
 // For Shopee, the initial request only returns the html. The JS must be run to fetch the data (which is why we need to use puppeteer)
 // https://github.com/puppeteer/puppeteer/blob/main/docs/troubleshooting.md#running-puppeteer-on-heroku
 async function shopeeSearch(keywords, channel) {
-    let messageID = ''
-    channel.send("Pleaase wait while we fetch results...")
-    .then(message => {
-        messageID = message
-    })
+    let messageID = await channel.send("Pleaase wait while we fetch results...")
     let combined = keywords.join('%20')
     let url = `https://shopee.co.id/search?keyword=${combined}`
+    console.log(`Searching for ${keywords.join(' ')}`)
+
     const browser = await puppeteer.launch({ args: ['--no-sandbox'] })
     const page = await browser.newPage()
+    page.setDefaultTimeout(15000)
     await page.goto(url)
-    await page.waitForSelector('._1NoI8_')
-    const html = await page.content()
-
-    const $ = cheerio.load(html)
-    const products = $('._1NoI8_')
-    const prices = $('._1xk7ak')
-
-    let results = ''
-
-    for(let i = 0; i < Math.min(products.length, 5); i++) {
-        results += `${products[i].children[0].data} - Rp.${prices[i].children[0].data} \n`
-    }
-    if(results === '') {
-        results = 'Either no results found or an error has occured.'
+    try {
+        await page.waitForSelector('._1NoI8_')
+        const html = await page.content()
+    
+        const $ = cheerio.load(html)
+        const products = $('._1NoI8_')
+        const prices = $('._1xk7ak')
+    
+        console.log(products.length)
+        for(let i = 0; i < Math.min(products.length, 5); i++) {
+            results += `${products[i].children[0].data} - Rp.${prices[i].children[0].data} \n`
+        }
+        if(results === '') {
+            results = 'No results found.'
+        }
+    } catch(err) {
+        console.log(err)
+        results = 'Either no results found or an error occured.' // TODO: Find a better way to detect if no products found.
     }
     browser.close()
-    if(messageID !== '') {
-        messageID.edit(results)
-    } else {
-        channel.send(results)
-    }
+    messageID.edit(results)
 }
 
 function refreshMemes() {
@@ -92,7 +91,7 @@ function refreshMemes() {
             let results = response.data.data
             let children = results.children
             children.forEach(element => {
-                memes.push([element.data.url, 'Link: https://www.reddit.com' + element.data.permalink])
+                memes.push([element.data.url, 'https://www.reddit.com' + element.data.permalink, element.data.title])
             });
             sendMeme()
         })
@@ -102,24 +101,14 @@ function refreshMemes() {
 }
 
 function sendMeme() {
-    memeChannel.send(memes[memeIndex][1], {
-        files: [memes[memeIndex][0]]
-    }).catch((err) => {
-        console.log("First level error")
-        console.log(err)
-        memeChannel.send(memes[memeIndex][1])
-            .catch((err2) => {
-                console.log("Second level error")
-                console.log(err2)
-            })
-            .then(() => {
-                memeIndex += 1
-            })
-    })
-        .then(() => {
-            memeIndex += 1
-        })
-    if (memeIndex >= memes.length) {
+    const embed = new Discord.MessageEmbed()
+    .setTitle(memes[memeIndex][2])
+    .setURL(memes[memeIndex][1])
+    .setImage(memes[memeIndex][0])
+    memeChannel.send(embed)
+    .catch(console.error)
+    memeIndex += 1
+    if(memeIndex >= memes.length) {
         refreshMemes()
     }
 }
