@@ -3,6 +3,7 @@
 const Axios = require('axios');
 const Discord = require('discord.js');
 const client = new Discord.Client();
+const cron = require('node-cron')
 
 let chessGuys = process.env.CHESS
 let memes = []
