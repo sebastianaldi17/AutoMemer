@@ -5,9 +5,8 @@
   "main": "bot.js",
   "dependencies": {
     "axios": "^0.21.1",
-    "cheerio": "^1.0.0-rc.3",
     "discord.js": "^12.4.1",
-    "puppeteer": "^5.5.0"
+    "node-cron": "^3.0.0"
   },
   "author": "sebastianaldi17",
   "license": "ISC"

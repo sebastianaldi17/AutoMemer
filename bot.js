@@ -1,17 +1,16 @@
-// https://www.reddit.com/r/dankmemes/top/.json?t=day
-
+// const cheerio = require('cheerio')
+// const puppeteer = require('puppeteer')
 const Axios = require('axios');
-const cheerio = require('cheerio')
-const puppeteer = require('puppeteer')
 const Discord = require('discord.js');
 const client = new Discord.Client();
 
+let chessGuys = process.env.CHESS
 let memes = []
 let memeIndex = 0
 let memeInterval = 1000 * parseInt(process.env.SECONDS)
 let memeChannel = ""
-let searchInterval = 5000
-let searching = false
+// let searchInterval = 5000
+// let searching = false
 
 // Disabled because tokopedia cannot be accessed from the USA/EU
 // function tokopediaSearch(keywords, channel) {
@@ -50,39 +49,40 @@ let searching = false
 
 // For Shopee, the initial request only returns the html. The JS must be run to fetch the data (which is why we need to use puppeteer)
 // https://github.com/puppeteer/puppeteer/blob/main/docs/troubleshooting.md#running-puppeteer-on-heroku
-async function shopeeSearch(keywords, channel) {
-    let messageID = await channel.send("Pleaase wait while we fetch results...")
-    let combined = keywords.join('%20')
-    let url = `https://shopee.co.id/search?keyword=${combined}`
-    let results = ''
-    console.log(`Searching for ${keywords.join(' ')}`)
+// Stopped working as of 12 March 2021, never used anyway. Just update the class tags to fix.
+// async function shopeeSearch(keywords, channel) {
+//     let messageID = await channel.send("Pleaase wait while we fetch results...")
+//     let combined = keywords.join('%20')
+//     let url = `https://shopee.co.id/search?keyword=${combined}`
+//     let results = ''
+//     console.log(`Searching for ${keywords.join(' ')}`)
 
-    const browser = await puppeteer.launch({ args: ['--no-sandbox'] })
-    const page = await browser.newPage()
-    page.setDefaultTimeout(15000)
-    await page.goto(url)
-    try {
-        await page.waitForSelector('._1NoI8_')
-        const html = await page.content()
+//     const browser = await puppeteer.launch({ args: ['--no-sandbox'] })
+//     const page = await browser.newPage()
+//     page.setDefaultTimeout(15000)
+//     await page.goto(url)
+//     try {
+//         await page.waitForSelector('._1NoI8_')
+//         const html = await page.content()
     
-        const $ = cheerio.load(html)
-        const products = $('._1NoI8_')
-        const prices = $('._1xk7ak')
+//         const $ = cheerio.load(html)
+//         const products = $('._1NoI8_')
+//         const prices = $('._1xk7ak')
     
-        console.log(products.length)
-        for(let i = 0; i < Math.min(products.length, 5); i++) {
-            results += `${products[i].children[0].data} - Rp.${prices[i].children[0].data} \n`
-        }
-        if(results === '') {
-            results = 'No results found.'
-        }
-    } catch(err) {
-        console.log(err)
-        results = 'Either no results found or an error occured.' // TODO: Find a better way to detect if no products found.
-    }
-    browser.close()
-    messageID.edit(results)
-}
+//         console.log(products.length)
+//         for(let i = 0; i < Math.min(products.length, 5); i++) {
+//             results += `${products[i].children[0].data} - Rp.${prices[i].children[0].data} \n`
+//         }
+//         if(results === '') {
+//             results = 'No results found.'
+//         }
+//     } catch(err) {
+//         console.log(err)
+//         results = 'Either no results found or an error occured.' // TODO: Find a better way to detect if no products found.
+//     }
+//     browser.close()
+//     messageID.edit(results)
+// }
 
 function refreshMemes() {
     memes = []
@@ -116,31 +116,39 @@ function sendMeme() {
 
 client.on('ready', () => {
     console.log('AutoMemer online.');
-    client.user.setActivity('!help for commands')
+    // client.user.setActivity('!help for commands')
     memeChannel = client.channels.cache.get(process.env.CHANNEL_ID)
     refreshMemes()
     setInterval(sendMeme, memeInterval)
+
+    // Schedule a ping every 21:30 (UTC+7) for chess
+    cron.schedule("30 14 * * *", () => {
+        memeChannel.send(chessGuys + ' Hey, its time for chess!')
+    })
 });
 
 client.on('message', message => {
+    // Add handlers for messaging when needed
+    // At the moment, no message handlers are needed for my server, feel free to customize
     if(message.author.bot) return
-    let contents = message.content.split(' ')
-    if(contents[0] === '!shopee') {
-        if(contents.length <= 1) {
-            message.reply("Please input search terms")
-            return
-        }
-        if(searching) {
-            message.reply('You can only search every 5 seconds (to avoid spamming)!')
-            return
-        }
-        searching = true
-        setTimeout(() => {searching = false}, searchInterval)
-        contents.shift()
-        shopeeSearch(contents, message.channel)
-    } else if(contents[0] === '!help') {
-        message.channel.send('!shopee <keywords> - Searches product at Shopee Indonesia')
-    }
+    // let contents = message.content.split(' ')
+    // if(contents[0] === '!shopee') {
+    //     if(contents.length <= 1) {
+    //         message.reply("Please input search terms")
+    //         return
+    //     }
+    //     if(searching) {
+    //         message.reply('You can only search every 5 seconds (to avoid spamming)!')
+    //         return
+    //     }
+    //     searching = true
+    //     setTimeout(() => {searching = false}, searchInterval)
+    //     contents.shift()
+    //     shopeeSearch(contents, message.channel)
+    // } else 
+    // if(contents[0] === '!help') {
+    //     message.channel.send('!shopee <keywords> - Searches product at Shopee Indonesia')
+    // }
 });
 
 client.login(process.env.BOT_TOKEN); //BOT_TOKEN is the Client Secret
