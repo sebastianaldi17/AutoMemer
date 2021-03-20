@@ -122,10 +122,11 @@ client.on('ready', () => {
     refreshMemes()
     setInterval(sendMeme, memeInterval)
 
+    // Disabled chess ping because everyone finds it annoying, and chess guys rarely play anymore
     // Schedule a ping every 21:30 (UTC+7) for chess
-    cron.schedule("30 14 * * *", () => {
-        memeChannel.send(chessGuys + ' Hey, its time for chess!')
-    })
+    // cron.schedule("30 14 * * *", () => {
+    //     memeChannel.send(chessGuys + ' Hey, its time for chess!')
+    // })
 });
 
 client.on('message', message => {
